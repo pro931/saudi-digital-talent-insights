@@ -2,7 +2,7 @@
 
 An interactive dashboard analyzing the growth of Saudi Arabia's **Information & Communication (ICT)** workforce and women's participation in tech, using official GASTAT labour market data (Q2 2022 – Q2 2026).
 
-🔗 **Live Dashboard:** [add Streamlit link]
+🔗 **Live Dashboard:** [[add Streamlit link]](https://saudi-digital-talent.streamlit.app/)
 
 ---
 
