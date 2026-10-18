@@ -61,4 +61,4 @@ streamlit run app.py
 
 ---
 
-**Rimas Alshahrani** · Data Analyst · [LinkedIn](add your link)
+**Rimas Alshahrani** · Data Analyst · https://www.linkedin.com/in/rimas-abdulrhman-a0018a3b6?utm_source=share_via&utm_content=profile&utm_medium=member_ios
