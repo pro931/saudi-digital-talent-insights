@@ -15,8 +15,9 @@ import streamlit as st
 # ----------------------------------------------------------
 st.set_page_config(page_title="Saudi Digital Talent Insights", page_icon="🇸🇦", layout="wide")
 
+
 GREEN = "#0B7A55"
-TEAL = "#2BA39A"
+TEAL = "#4C8DF6"
 GOLD = "#C9A227"
 GREY = "#8A949E"
 MCIT_BENCHMARK = 35  # MCIT reported women's share in the tech workforce (%)
@@ -27,6 +28,7 @@ st.markdown(
     .block-container {padding-top: 2rem;}
     [data-testid="stMetricValue"] {font-size: 2rem; color: #0B7A55;}
     .note {color: #6b7280; font-size: 0.85rem;}
+    [data-testid="stSlider"] {direction: ltr;}
     </style>
     """,
     unsafe_allow_html=True,
@@ -64,6 +66,7 @@ st.sidebar.markdown(
 st.sidebar.markdown("**Built by:** Rimas Alshahrani")
 
 data = df[(df["Year"] >= year_range[0]) & (df["Year"] <= year_range[1])].copy()
+data["Label"] = data["Year"].astype(str)
 first, last = data.iloc[0], data.iloc[-1]
 
 # ----------------------------------------------------------
@@ -114,7 +117,7 @@ c1, c2 = st.columns(2)
 
 with c1:
     trend = data.melt(
-        id_vars="Period",
+        id_vars="Label",
         value_vars=[f"{prefix}_Male", f"{prefix}_Female", f"{prefix}_Total"],
         var_name="Gender",
         value_name="Share",
@@ -122,19 +125,20 @@ with c1:
     trend["Gender"] = trend["Gender"].str.replace(f"{prefix}_", "", regex=False)
     fig1 = px.line(
         trend,
-        x="Period",
+        x="Label",
         y="Share",
         color="Gender",
         markers=True,
         color_discrete_map={"Male": TEAL, "Female": GOLD, "Total": GREEN},
         title=f"Share of {group} workers employed in ICT (%)",
     )
-    fig1.update_layout(yaxis_title="% of employed", xaxis_title="", legend_title="")
+    fig1.update_layout(yaxis_title="% of employed", xaxis_title="Year (Q2 data)", legend_title="")
+    fig1.update_xaxes(type="category", showgrid=False)
     st.plotly_chart(fig1, use_container_width=True)
 
 with c2:
     comp = data.melt(
-        id_vars="Period",
+        id_vars="Label",
         value_vars=["Saudi_Male", "Saudi_Female", "NonSaudi_Total"],
         var_name="Group",
         value_name="Share",
@@ -144,14 +148,15 @@ with c2:
     )
     fig2 = px.bar(
         comp,
-        x="Period",
+        x="Label",
         y="Share",
         color="Group",
         barmode="group",
         color_discrete_map={"Saudi men": TEAL, "Saudi women": GOLD, "Non-Saudis": GREY},
         title="Who is moving into ICT? (% of each group)",
     )
-    fig2.update_layout(yaxis_title="% of employed", xaxis_title="", legend_title="")
+    fig2.update_layout(yaxis_title="% of employed", xaxis_title="Year (Q2 data)", legend_title="")
+    fig2.update_xaxes(type="category", showgrid=False)
     st.plotly_chart(fig2, use_container_width=True)
 
 # ----------------------------------------------------------
@@ -160,21 +165,21 @@ with c2:
 fig3 = go.Figure()
 fig3.add_trace(
     go.Scatter(
-        x=data["Period"], y=data["Saudi_Women_in_ICT"], mode="lines+markers+text",
+        x=data["Label"], y=data["Saudi_Women_in_ICT"], mode="lines+markers+text",
         name="Saudi women (of Saudi ICT workers)", line=dict(color=GOLD, width=3),
         text=data["Saudi_Women_in_ICT"].round(1), textposition="top center",
     )
 )
 fig3.add_trace(
     go.Scatter(
-        x=data["Period"], y=data["All_Women_in_ICT"], mode="lines+markers+text",
+        x=data["Label"], y=data["All_Women_in_ICT"], mode="lines+markers+text",
         name="All women (of all ICT workers)", line=dict(color=GREEN, width=3),
         text=data["All_Women_in_ICT"].round(1), textposition="bottom center",
     )
 )
 fig3.add_trace(
     go.Scatter(
-        x=data["Period"], y=data["Saudi_FemaleShare"], mode="lines",
+        x=data["Label"], y=data["Saudi_FemaleShare"], mode="lines",
         name="Saudi women (of all Saudi workers)", line=dict(color=GREY, dash="dot"),
     )
 )
@@ -182,9 +187,10 @@ fig3.add_hline(
     y=MCIT_BENCHMARK, line_dash="dash", line_color="#B42318",
     annotation_text="MCIT reported: 35%", annotation_position="top left",
 )
+fig3.update_xaxes(type="category", showgrid=False)
 fig3.update_layout(
     title="Women's share of the ICT workforce (%)",
-    yaxis_title="%", xaxis_title="", legend_title="",
+    yaxis_title="%", xaxis_title="Year (Q2 data)", legend_title="",
     yaxis_range=[0, 45], legend=dict(orientation="h", y=-0.2),
 )
 st.plotly_chart(fig3, use_container_width=True)
@@ -195,6 +201,37 @@ st.markdown(
     "estimates, not headcounts.</p>",
     unsafe_allow_html=True,
 )
+
+# ----------------------------------------------------------
+# The problem: a matching gap
+# ----------------------------------------------------------
+st.markdown("---")
+st.subheader("🔍 The Problem: the talent exists, but it is not reaching ICT jobs")
+p1, p2, p3 = st.columns(3)
+p1.metric(
+    "Unemployment: Saudi women with ICT specialization",
+    "16.5%",
+    "vs 7.8% for Saudi men",
+    delta_color="off",
+)
+p2.metric("Unemployed Saudi women holding a bachelor's", "60%", delta_color="off")
+p3.metric("Unemployed Saudi women willing to work in private sector", "96%", delta_color="off")
+st.markdown(
+    "Meanwhile, recent ICT growth went mainly to non-Saudi workers. "
+    "**This is a matching gap, not a talent gap.**"
+)
+st.markdown(
+    '<p class="note">Q2 2026 · Source: GASTAT Labour Market Statistics, Tables 2-3, 2-7 and 2-11.</p>',
+    unsafe_allow_html=True,
+)
+
+st.subheader("💡 Proposed Solution: “Rabt” (Connect)")
+s1, s2, s3, s4 = st.columns(4)
+s1.markdown("**01 · Match**  \nOne pathway linking ICT-qualified Saudi women to MCIT partner companies")
+s2.markdown("**02 · Prioritize**  \nQualified Saudi candidates first for entry-level tech roles")
+s3.markdown("**03 · Upskill**  \nShort training on skills the employer names, tied to a job offer")
+s4.markdown("**04 · Measure**  \nTrack ICT-graduate unemployment and women's ICT share every quarter")
+st.success("No new government payroll: builds on existing partnerships and private-sector demand.")
 
 # ----------------------------------------------------------
 # Insights & Recommendations
@@ -227,8 +264,9 @@ with i2:
    placement programs can redirect this growth.
 2. **Track both indicators:** report women's share among *all* ICT workers next to the
    Saudi-only figure, to show the full picture (~10% vs ~31%).
-3. **Accelerate localization in ICT roles:** recent sector growth is driven mainly by
-   non-Saudi workers; linking training programs to direct hiring can raise Saudi uptake.
+3. **Link partner training to private-sector hiring:** recent sector growth is driven
+   mainly by non-Saudi workers; asking training partners to commit to hiring a share of
+   Saudi trainees can raise Saudi uptake without new government payroll.
 4. **Scale the talent pipeline:** at ~1.3% of employment, ICT still has wide room to grow
    in line with Vision 2030 digital economy goals.
 """
